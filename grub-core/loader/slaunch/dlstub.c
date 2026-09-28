@@ -83,6 +83,12 @@ void dl_entry (grub_uint64_t dl_ctx)
     {
       grub_skl_link_amd_info (slparams);
 
+      /*
+       * SKINIT's locality 4 measurement may not reach the TPM while locality
+       * 0 is active, so release it whether or not a PSP runs the launch.
+       */
+      grub_tpm_relinquish_locality (0);
+
       err = grub_psp_discover ();
       if (err == GRUB_ERR_NONE)
         {
@@ -97,7 +103,6 @@ void dl_entry (grub_uint64_t dl_ctx)
         {
           grub_dprintf ("slaunch", "launching without a PSP: %s", grub_errmsg);
           grub_errno = GRUB_ERR_NONE;
-          grub_tpm_relinquish_locality (0);
         }
 
       err = grub_skinit_prepare_cpu ();
